@@ -179,6 +179,7 @@ def _parse_char_shapes(models: list[dict], border_fills: list[BorderFill]) -> li
         if model["type"].__name__ != "CharShape":
             continue
         content = model["content"]
+        flags = content.get("charshapeflags", 0)
         result.append(
             CharShape(
                 id=len(result),
@@ -194,6 +195,8 @@ def _parse_char_shapes(models: list[dict], border_fills: list[BorderFill]) -> li
                 basesize=int(content.get("basesize", 1000)),
                 text_color=_hwp_color(content.get("text_color", 0), "none"),
                 shade_color=_hwp_color(content.get("shade_color", -1), "none"),
+                bold=bool(getattr(flags, "bold", 0)),
+                italic=bool(getattr(flags, "italic", 0)),
                 letter_spacing={
                     "hangul": int(content["letter_spacing"].get("ko", 0)),
                     "latin": int(content["letter_spacing"].get("en", 0)),
@@ -502,7 +505,7 @@ def _parse_paragraph(header: dict, related: list[dict], warnings: list[str]) -> 
         para_shape_id=int(header.get("parashape_id", 0)),
         style_id=int(header.get("style_id", 0)),
         split=int(header.get("split", 0)),
-        page_break=False,
+        page_break=_paragraph_page_break(header.get("split", 0)),
         column_break=False,
         runs=runs,
         line_segs=line_segs,
@@ -1155,6 +1158,10 @@ def _table_page_break(value) -> str:
     }.get(name, "TABLE")
 
 
+def _paragraph_page_break(value) -> bool:
+    return bool(int(value or 0) & 0x4)
+
+
 def _enum_name(value) -> str:
     name = getattr(value, "name", None)
     if name is not None:
@@ -1181,6 +1188,8 @@ def _default_char_shape() -> CharShape:
         basesize=1000,
         text_color="#000000",
         shade_color="none",
+        bold=False,
+        italic=False,
         letter_spacing={key: 0 for key in keys},
         letter_width_expansion={key: 100 for key in keys},
         relative_size={key: 100 for key in keys},

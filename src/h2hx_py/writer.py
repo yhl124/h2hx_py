@@ -329,6 +329,10 @@ def _char_properties(parent: ET.Element, char_shapes: list[CharShape]) -> None:
                     "user": str(values["user"]),
                 },
             )
+        if char_shape.bold:
+            ET.SubElement(node, _q("hh", "bold"))
+        if char_shape.italic:
+            ET.SubElement(node, _q("hh", "italic"))
         ET.SubElement(node, _q("hh", "underline"), {"type": "NONE", "shape": "SOLID", "color": "#000000"})
         ET.SubElement(node, _q("hh", "strikeout"), {"shape": "NONE", "color": "#000000"})
         ET.SubElement(node, _q("hh", "outline"), {"type": "NONE"})
@@ -844,10 +848,31 @@ def _section_def_xml(section_def: SectionDef) -> ET.Element:
 def _note_shape_xml(tag: str, note_shape: NoteShape) -> ET.Element:
     node = ET.Element(_q("hp", tag))
     ET.SubElement(node, _q("hp", "autoNumFormat"), {"type": "DIGIT", "userChar": "", "prefixChar": "", "suffixChar": note_shape.suffix, "supscript": "0"})
-    ET.SubElement(node, _q("hp", "noteLine"), {"length": str(note_shape.splitter_length), "type": "SOLID", "width": "0.12 mm", "color": note_shape.splitter_color})
-    ET.SubElement(node, _q("hp", "noteSpacing"), {"betweenNotes": str(note_shape.splitter_margin_top), "belowLine": str(note_shape.splitter_margin_bottom), "aboveLine": str(note_shape.notes_spacing)})
+    ET.SubElement(
+        node,
+        _q("hp", "noteLine"),
+        {
+            "length": str(note_shape.splitter_length),
+            "type": "SOLID",
+            "width": _note_line_width(note_shape.splitter_width),
+            "color": note_shape.splitter_color,
+        },
+    )
+    ET.SubElement(
+        node,
+        _q("hp", "noteSpacing"),
+        {
+            "betweenNotes": str(note_shape.notes_spacing),
+            "belowLine": str(note_shape.splitter_margin_bottom),
+            "aboveLine": str(note_shape.splitter_margin_top),
+        },
+    )
     ET.SubElement(node, _q("hp", "numbering"), {"type": "CONTINUOUS", "newNum": str(note_shape.starting_number)})
-    ET.SubElement(node, _q("hp", "placement"), {"place": "END_OF_DOCUMENT", "beneathText": "0"})
+    ET.SubElement(
+        node,
+        _q("hp", "placement"),
+        {"place": "EACH_COLUMN" if tag == "footNotePr" else "END_OF_DOCUMENT", "beneathText": "0"},
+    )
     return node
 
 
@@ -891,6 +916,10 @@ def _alpha_text(value: float) -> str:
     if float(value).is_integer():
         return str(int(value))
     return str(value)
+
+
+def _note_line_width(value: int) -> str:
+    return "0.1 mm" if int(value) <= 0 else "0.12 mm"
 
 
 def _q(prefix: str, local: str) -> str:

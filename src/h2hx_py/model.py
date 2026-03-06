@@ -64,6 +64,8 @@ class CharShape:
     basesize: int
     text_color: str
     shade_color: str
+    bold: bool
+    italic: bool
     letter_spacing: dict[str, int]
     letter_width_expansion: dict[str, int]
     relative_size: dict[str, int]
