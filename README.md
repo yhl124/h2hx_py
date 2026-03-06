@@ -2,7 +2,9 @@
 
 Python package that converts `.hwp` files into `.hwpx`.
 
-This project is an in-progress Python port of the Java-based `hwp2hwpx` converter in the same workspace. It currently focuses on producing a valid HWPX package and preserving common document structures such as paragraphs, tables, equations, and fields.
+This project is a Python port of [`hwp2hwpx`](https://github.com/neolord0/hwp2hwpx), originally implemented in Java. The porting work was done with Codex (GPT-5.4).
+
+It currently focuses on producing a valid HWPX package and preserving common document structures such as paragraphs, tables, equations, and fields.
 
 ## Status
 
